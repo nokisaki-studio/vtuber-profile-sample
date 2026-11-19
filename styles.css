@@ -1,0 +1,927 @@
+/* 綿雲ねむ — おしながき
+   空色の色上質紙に、リソグラフで青と蛍光ピンクの 2 色刷り。
+   白は刷れないので、白く見せたい所は紙の色。ピンクの版は少しずれる(--mx / --my)。
+   寸法は 8px の方眼にそろえる。 */
+
+@property --mx { syntax: "<length>"; inherits: true; initial-value: 1.6px; }
+@property --my { syntax: "<length>"; inherits: true; initial-value: -1.2px; }
+
+:root {
+  --paper: #C6E4F1;
+  --blue: #2F4FA2;
+  --blue-deep: #243F86;
+  --pink: #FF4FA7;
+  --mx: 1.6px;
+  --my: -1.2px;
+  --rule: 2.5px;
+  --s1: 8px;
+  --s2: 16px;
+  --s3: 24px;
+  --s4: 32px;
+  --s6: 48px;
+  --s8: 64px;
+  --s12: 96px;
+  --hand: "Yusei Magic", "Zen Kaku Gothic New", sans-serif;
+  --body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --dots-pink: radial-gradient(circle, var(--pink) 0 1.35px, transparent 1.75px) 0 0 / 5.5px 5.5px;
+  --dots-pink-light: radial-gradient(circle, var(--pink) 0 0.9px, transparent 1.3px) 0 0 / 5px 5px;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background-color: var(--paper);
+  /* 紙の繊維 */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .18 0 0 0 0 .3 0 0 0 0 .62 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");
+  color: var(--blue);
+  scrollbar-color: var(--blue) var(--paper);
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.85;
+  font-feature-settings: "palt" 0;
+}
+
+::selection { background: rgba(255, 79, 167, .42); color: var(--blue-deep); }
+
+a { color: inherit; text-decoration-color: var(--pink); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+.nowrap { white-space: nowrap; }
+
+.skip {
+  position: absolute; left: var(--s2); top: -64px; z-index: 10;
+  background: var(--blue); color: var(--paper); padding: var(--s1) var(--s2); font-weight: 700;
+}
+.skip:focus { top: var(--s2); }
+
+/* ---------- 刷りの部品 ---------- */
+
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.pp { fill: var(--paper); }
+.ib { fill: var(--blue); }
+.ip { fill: var(--pink); }
+.htp { fill: url(#ht-pink); }
+.htb { fill: url(#ht-blue); }
+.sb { fill: none; stroke: var(--blue); stroke-width: 4.2; stroke-linecap: round; stroke-linejoin: round; }
+.pp.sb { fill: var(--paper); }
+.sp { fill: none; stroke: var(--pink); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.thin { stroke-width: 3.2; }
+.hair { stroke-width: 2.2; }
+.dash { stroke-dasharray: 2 5; }
+.ink-p { mix-blend-mode: multiply; transform: translate(var(--mx), var(--my)); }
+
+/* ---------- 紙と枠 ---------- */
+
+.sheet {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--s3) var(--s3) var(--s6);
+  overflow-x: clip;
+}
+.sheet::before {
+  content: "";
+  position: absolute;
+  inset: var(--s1);
+  border: 7px double var(--blue);
+  pointer-events: none;
+}
+
+.crop { display: none; }
+
+.band {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s1) var(--s2);
+  padding: var(--s1) var(--s1) var(--s1);
+  border-bottom: var(--rule) solid var(--blue);
+}
+.band p { margin: 0; }
+.band-title {
+  font-family: var(--hand);
+  font-size: 20px;
+  line-height: 1.4;
+  background: var(--blue);
+  color: var(--paper);
+  padding: 2px var(--s2) 4px;
+}
+.band-note { font-size: 13px; font-weight: 500; line-height: 1.6; }
+
+/* ---------- 並べ方 ---------- */
+
+.layout { position: relative; }
+.paper { min-width: 0; }
+.stage { display: none; }
+
+/* ---------- 表紙 ---------- */
+
+.hero {
+  position: relative;
+  padding: var(--s2) var(--s1) var(--s2);
+}
+
+.hero-name {
+  position: relative;
+  display: inline-block;
+  margin: var(--s2) 0 0;
+  font-family: var(--hand);
+  font-weight: 400;
+  font-size: clamp(56px, 17vw, 96px);
+  line-height: 1.25;
+  letter-spacing: .02em;
+  isolation: isolate;
+}
+/* ピンクの網点を文字の上に刷り重ねる(青と重なった所は紫になる) */
+.hero-name::after {
+  content: "";
+  position: absolute;
+  left: -.12em;
+  right: -.18em;
+  bottom: .16em;
+  height: .36em;
+  background: var(--dots-pink);
+  mix-blend-mode: multiply;
+  transform: translate(var(--mx), var(--my)) rotate(-1deg);
+  pointer-events: none;
+  z-index: 1;
+}
+.hero-name rt {
+  font-family: var(--body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .3em;
+}
+
+.hero-hook {
+  margin: var(--s2) 0 0;
+  max-width: 26em;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+/* 狭い画面: 羊は自分の段に大きく立ち、右の枠をはみ出す。ゴム印は羊の左 */
+.hero-visual {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  margin: calc(var(--s3) * -1) -40px 0 0;
+}
+.hero-pose { width: min(60vw, 260px); }
+.hero-pose svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+.stamp {
+  position: absolute;
+  top: 38%;
+  left: 0;
+  width: 104px;
+  height: 104px;
+  margin: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  line-height: 1.2;
+  border-radius: 50%;
+  border: 3px solid var(--pink);
+  box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 6px var(--pink);
+  background: var(--paper);
+  transform: rotate(-11deg);
+  z-index: 2;
+}
+.stamp-small { font-size: 11px; font-weight: 700; }
+.stamp-big { font-family: var(--hand); font-size: 21px; font-variant-numeric: tabular-nums; }
+.facts, .items { clear: both; }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-top: var(--s2);
+}
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px var(--s3);
+  border: var(--rule) solid var(--blue);
+  border-radius: 2px;
+  font: 700 16px/1.4 var(--body);
+  text-decoration: none;
+  cursor: pointer;
+  isolation: isolate;
+  transition: transform .18s cubic-bezier(.2, .8, .2, 1);
+}
+.btn-primary { background: var(--blue); color: var(--paper); }
+/* ピンクの版: 押すと見当が合う */
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--rule) * -1);
+  background: var(--pink);
+  mix-blend-mode: multiply;
+  transform: translate(var(--mx), var(--my));
+  transition: transform .18s cubic-bezier(.2, .8, .2, 1);
+  z-index: -1;
+}
+.btn-primary:hover::before { transform: translate(calc(var(--mx) / 2), calc(var(--my) / 2)); }
+.btn-primary:active::before { transform: translate(0, 0); }
+.btn-primary:active { transform: translate(2px, 2px); }
+.btn-secondary { background: var(--paper); color: var(--blue); }
+.btn-secondary:hover { background: var(--dots-pink-light), var(--paper); }
+.btn-secondary:active { transform: translateY(1px); }
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--s3);
+  margin: var(--s2) 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.facts div { display: flex; gap: var(--s1); }
+.facts dt { font-weight: 700; }
+.facts dt::after { content: ":"; }
+.facts dd { margin: 0; }
+
+/* ---------- お品書きの項目 ---------- */
+
+.items {
+  position: relative;
+  list-style: none;
+  margin: var(--s1) 0 0;
+  padding: 0;
+}
+/* 全項目を通る 1 本の点線 */
+.items::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: var(--s6);
+  bottom: var(--s4);
+  border-left: 3px dotted var(--blue);
+}
+
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  column-gap: var(--s2);
+  padding-top: var(--s6);
+}
+.item:first-child { padding-top: var(--s3); }
+
+.num {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
+  border-radius: 50%;
+  border: var(--rule) solid var(--blue);
+  background: var(--paper);
+  font-family: var(--hand);
+  font-size: 22px;
+  line-height: 1;
+  isolation: isolate;
+  z-index: 1;
+}
+.num::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: var(--dots-pink);
+  transform: translate(calc(var(--mx) * 1.5), calc(var(--my) * -1.5));
+  z-index: -1;
+}
+
+.item-body { min-width: 0; }
+.item-body > p { margin: 0 0 var(--s2); max-width: 34em; font-size: 16px; }
+
+.item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--s1);
+  margin: 0 0 var(--s2);
+  font-family: var(--hand);
+  font-weight: 400;
+  font-size: clamp(26px, 7vw, 38px);
+  line-height: 1.35;
+}
+.item-name { position: relative; isolation: isolate; }
+.item-name::after {
+  content: "";
+  position: absolute;
+  left: -.1em;
+  right: -.1em;
+  bottom: .05em;
+  height: .36em;
+  background: var(--dots-pink);
+  mix-blend-mode: multiply;
+  transform: translate(var(--mx), var(--my));
+  z-index: -1;
+}
+.leader {
+  flex: 1 1 24px;
+  min-width: 24px;
+  align-self: center;
+  border-bottom: 3px dotted var(--blue);
+  transform: translateY(.18em);
+}
+.item-when {
+  font-family: var(--body);
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.pose { margin: 0; }
+.pose svg { display: block; width: 100%; height: auto; overflow: visible; }
+/* 狭い画面: 絵は本文の横に浮かせず、見出しの下に右寄せで立たせる(本文は幅いっぱい) */
+.pose-inline {
+  width: min(46vw, 184px);
+  margin: calc(var(--s1) * -1) -32px var(--s1) auto;
+}
+
+.aside-note { font-size: 14px; font-weight: 500; }
+.aside-note::before { content: "※ "; }
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+  list-style: none;
+  margin: 0 0 var(--s2);
+  padding: 0;
+}
+.tags li {
+  border: 2px solid var(--blue);
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 30px;
+}
+
+.sub-head {
+  clear: both;
+  margin: var(--s4) 0 var(--s1);
+  font-family: var(--hand);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.4;
+}
+
+/* 今週の予定 */
+.week {
+  clear: both;
+  list-style: none;
+  margin: 0 0 var(--s2);
+  padding: 0;
+  display: grid;
+  gap: var(--s1);
+}
+.day {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px 64px minmax(0, 1fr);
+  align-items: center;
+  min-height: 48px;
+  padding: 4px 12px;
+  border: var(--rule) solid var(--blue);
+  background: var(--paper);
+  line-height: 1.5;
+}
+.dow { font-family: var(--hand); font-size: 22px; }
+.time { font-weight: 700; font-variant-numeric: tabular-nums; }
+.what { font-size: 15px; font-weight: 500; }
+/* 休みの日は空き枠に札 */
+.day.is-off { border-style: dashed; }
+.tag {
+  grid-column: 2 / -1;
+  justify-self: start;
+  position: relative;
+  padding: 0 12px 0 22px;
+  border: 2px solid var(--pink);
+  border-radius: 2px 12px 12px 2px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 26px;
+  transform: rotate(-4deg);
+}
+.tag::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  border: 2px solid var(--pink);
+}
+.day.is-next { border-width: 3.5px; }
+.day.is-next .what { font-weight: 700; }
+.next-mark {
+  position: absolute;
+  right: -6px;
+  top: -14px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2.5px solid var(--pink);
+  background: var(--paper);
+  font-size: 12px;
+  font-weight: 700;
+  transform: rotate(12deg);
+}
+
+.places { list-style: none; margin: 0 0 var(--s1); padding: 0; }
+.places li { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--s1); padding: 4px 0; }
+.place-name { font-weight: 700; white-space: nowrap; }
+.place-what { font-size: 15px; font-weight: 500; white-space: nowrap; margin-left: auto; }
+.places .leader { transform: translateY(-.25em); }
+
+/* ファンアート */
+.hashtags {
+  clear: both;
+  display: grid;
+  gap: var(--s1);
+  margin: 0 0 var(--s2);
+}
+.hashtags div { display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; }
+.hashtags dt { font-size: 14px; font-weight: 700; min-width: 6.5em; }
+.hashtags dd {
+  margin: 0;
+  font-family: var(--hand);
+  font-size: 22px;
+  line-height: 1.4;
+  position: relative;
+  isolation: isolate;
+}
+.hashtags dd::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: 2px;
+  height: 10px;
+  background: var(--dots-pink);
+  mix-blend-mode: multiply;
+  z-index: -1;
+}
+
+.rules { display: grid; gap: 0 var(--s4); }
+.checks { list-style: none; margin: 0; padding: 0; }
+.checks li { position: relative; padding-left: 30px; margin-bottom: var(--s1); }
+.checks li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--blue);
+}
+.checks li::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 4px;
+  width: 7px;
+  height: 14px;
+  border: solid var(--pink);
+  border-width: 0 3.5px 3.5px 0;
+  transform: rotate(40deg) translate(var(--mx), var(--my));
+}
+.checks.is-ask li::after {
+  left: 6px;
+  top: 12px;
+  width: 6px;
+  height: 6px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--pink);
+  transform: none;
+}
+
+/* お仕事のご依頼: キリトリ線の申込欄 */
+.coupon {
+  clear: both;
+  position: relative;
+  margin-top: var(--s4);
+  padding: var(--s4) var(--s2) var(--s3);
+  border: var(--rule) dashed var(--blue);
+}
+.kiritori {
+  position: absolute;
+  top: -15px;
+  left: var(--s2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0 var(--s1);
+  background: var(--paper);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 26px;
+}
+.scissors { width: 20px; height: 20px; fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; }
+
+.form-title { margin: 0; font-family: var(--hand); font-size: 26px; line-height: 1.4; }
+.field { margin: var(--s3) 0 0; padding: 0; border: 0; min-width: 0; }
+.field label, .field legend { display: block; padding: 0; font-size: 14px; font-weight: 700; }
+.field input[type="text"],
+.field input[type="email"],
+.field textarea {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 4px;
+  font: 500 16px/1.7 var(--body);
+  color: var(--blue-deep);
+  caret-color: var(--pink);
+  background: transparent;
+  border: 0;
+  border-bottom: var(--rule) solid var(--blue);
+  border-radius: 0;
+  appearance: none;
+}
+.field textarea { border: var(--rule) solid var(--blue); padding: 8px 12px; resize: none; min-height: 144px; }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--blue-deep); }
+.field input:focus-visible, .field textarea:focus-visible { box-shadow: 0 3px 0 0 var(--pink); }
+.field textarea:focus-visible { box-shadow: 0 0 0 3px var(--pink); }
+.field ::placeholder { color: var(--blue); opacity: 1; font-size: 14px; }
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"] { border-color: var(--pink); border-bottom-width: 3.5px; }
+.field textarea[aria-invalid="true"] { border-width: 3.5px; }
+
+.kinds { display: grid; gap: var(--s1); margin-top: var(--s1); }
+.kind {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 2px solid var(--blue);
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  cursor: pointer;
+}
+.kind input {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border: 2.5px solid var(--blue);
+  background: var(--paper);
+  cursor: pointer;
+}
+.kind input:checked {
+  background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M4 10.5l4 4 8-9' fill='none' stroke='%23FF4FA7' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px no-repeat;
+}
+.kind:has(input:checked) { border-width: 3.5px; padding: 6.5px 10.5px; }
+.kind:hover { border-color: var(--blue-deep); box-shadow: inset 0 -4px 0 0 rgba(255, 79, 167, .55); }
+
+.error {
+  position: relative;
+  margin: 6px 0 0;
+  padding-left: 26px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+/* 注意の印: ピンクの丸に青の縦線と点(描いた SVG) */
+.error::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 19px;
+  height: 19px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10.6' cy='9.4' r='8.6' fill='%23FF4FA7'/%3E%3Cpath d='M10 5.2v6' fill='none' stroke='%232F4FA2' stroke-width='2.6' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='14.6' r='1.5' fill='%232F4FA2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.form .btn { margin-top: var(--s4); }
+.form-note { margin: var(--s1) 0 0; font-size: 14px; font-weight: 500; }
+
+.receipt { position: relative; }
+.receipt:focus { outline: none; }
+/* 受付印: 送った瞬間に「ポン!」と押される(この見本で、操作に返す動きはここだけ) */
+.receipt-mark {
+  position: absolute;
+  right: 0;
+  top: -8px;
+  width: 72px;
+  height: 72px;
+}
+.burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  overflow: visible;
+  pointer-events: none;
+  visibility: hidden;
+}
+.burst-lines path {
+  fill: none;
+  stroke: var(--pink);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: .45 2;
+  stroke-dashoffset: .45;
+  mix-blend-mode: multiply;
+}
+.puff { transform-box: fill-box; transform-origin: center; }
+.puff-line { fill: var(--blue); stroke: var(--blue); stroke-width: 5; }
+.puff-fill { fill: var(--paper); }
+.pon {
+  position: absolute;
+  left: -104px;
+  top: -46px;
+  width: 112px;
+  overflow: visible;
+  pointer-events: none;
+  visibility: hidden;
+  transform: rotate(-12deg);
+}
+.pon-ink path, .pon-ink circle { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.pon-pink { transform: translate(3px, 3px); mix-blend-mode: multiply; }
+.pon-pink path, .pon-pink circle { stroke: var(--pink); stroke-width: 13; }
+.pon-line path, .pon-line circle { stroke: var(--blue); stroke-width: 12; }
+.pon-fill path, .pon-fill circle { stroke: var(--paper); stroke-width: 5; }
+
+/* コマ打ち: キーフレームの間を補間せず、1 コマずつ切り替える(約 80ms ずつ) */
+@keyframes stamp-press {
+  0% { transform: rotate(-12deg) scale(1.9); opacity: 0; }
+  20% { transform: rotate(-17deg) scale(1.35); opacity: 1; }
+  40% { transform: rotate(-12deg) scale(.86); }
+  60% { transform: rotate(-10deg) scale(1.07); }
+  80%, 100% { transform: rotate(-12deg) scale(1); opacity: 1; }
+}
+@keyframes burst-show {
+  0% { visibility: visible; }
+  100% { visibility: hidden; }
+}
+@keyframes burst-out {
+  0% { stroke-dashoffset: .45; }
+  25% { stroke-dashoffset: .1; }
+  50% { stroke-dashoffset: -.3; }
+  75% { stroke-dashoffset: -.7; }
+  100% { stroke-dashoffset: -1.2; }
+}
+@keyframes puff-up {
+  0% { transform: scale(.4); }
+  25% { transform: scale(.9); }
+  50% { transform: scale(1.15) translateY(-3px); }
+  75% { transform: scale(1.25) translateY(-6px); }
+  100% { transform: scale(1.25) translateY(-6px); }
+}
+@keyframes pon-pop {
+  0% { visibility: visible; transform: rotate(-12deg) scale(.45); }
+  12% { transform: rotate(-14deg) scale(1.28); }
+  24% { transform: rotate(-12deg) scale(.96); }
+  36%, 84% { transform: rotate(-12deg) scale(1); }
+  92% { transform: rotate(-11deg) translate(-3px, -5px) scale(1.04); }
+  100% { visibility: hidden; transform: rotate(-11deg) translate(-3px, -5px) scale(1.04); }
+}
+.receipt-mark.is-pressed .receipt-stamp { animation: stamp-press .4s steps(1, end) both; }
+/* 印が紙に当たるコマ(0.16 秒後)から出す。それまでは隠しておく(forwards) */
+.receipt-mark.is-pressed .burst { animation: burst-show .44s steps(1, end) .16s forwards; }
+.receipt-mark.is-pressed .burst-lines path { animation: burst-out .44s steps(1, end) .16s forwards; }
+.receipt-mark.is-pressed .puff { animation: puff-up .44s steps(1, end) .16s forwards; }
+.receipt-mark.is-pressed .pon { animation: pon-pop 1.7s steps(1, end) .16s forwards; }
+
+.receipt-stamp {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 0;
+  border-radius: 50%;
+  border: 3px solid var(--pink);
+  box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 6px var(--pink);
+  font-family: var(--hand);
+  font-size: 22px;
+  transform: rotate(-12deg);
+}
+.receipt-list { margin: var(--s3) 0 0; }
+.receipt-list div {
+  display: grid;
+  grid-template-columns: 8.5em 32px minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: var(--s1);
+  padding: 4px 0;
+}
+.receipt-list dt { font-size: 14px; font-weight: 700; }
+.receipt-list .leader { transform: none; align-self: center; }
+.receipt-list dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
+.receipt .btn { margin-top: var(--s3); }
+
+/* 奥付 */
+.colophon {
+  clear: both;
+  margin: var(--s8) 0 0;
+  padding: var(--s3) var(--s1) 0;
+  border-top: var(--rule) solid var(--blue);
+  font-size: 14px;
+  font-weight: 500;
+}
+.colophon p { margin: 0 0 var(--s1); max-width: 40em; }
+.colophon .maker { margin-top: var(--s2); font-family: var(--hand); font-size: 20px; font-weight: 400; }
+
+/* ---------- 動き: 姿はカチッと替わり、少し行き過ぎて止まる ---------- */
+
+@keyframes slap {
+  0% { transform: translateY(-14px) scale(1.05, .95); }
+  100% { transform: none; }
+}
+@keyframes misreg {
+  0% { --mx: 8px; --my: -6px; }
+  100% { --mx: 1.6px; --my: -1.2px; }
+}
+.is-swapping .stage-art,
+.pose-inline.is-in svg {
+  animation: slap .3s cubic-bezier(.3, 1.45, .5, 1) both;
+}
+.is-swapping,
+.pose-inline.is-in {
+  animation: misreg .42s steps(4, end) both;
+}
+
+/* ---------- 少し広い画面 ---------- */
+
+@media (min-width: 640px) {
+  .sheet { padding: var(--s4) var(--s4) var(--s8); }
+  .sheet::before { inset: var(--s2); }
+  .band { padding: var(--s1) var(--s2); }
+  .hero { padding: var(--s6) var(--s2) var(--s4); }
+  .hero-hook { font-size: 20px; }
+  .hero-visual { margin: var(--s2) -48px 0 0; }
+  .hero-pose { width: min(50vw, 360px); }
+  .actions, .facts { margin-top: var(--s4); }
+  .item:first-child { padding-top: var(--s4); }
+  .stamp { left: 8%; width: 124px; height: 124px; }
+  .stamp-big { font-size: 25px; }
+  .stamp-small { font-size: 12px; }
+  .items::before { left: 19px; }
+  .item { grid-template-columns: 40px minmax(0, 1fr); column-gap: var(--s3); padding-top: var(--s8); }
+  .item-body > p { font-size: 17px; }
+  /* 本文の幅に余裕があるので、ここからは本文の横に立たせる(1 行 18 字以上を保つ) */
+  .pose-inline { float: right; width: 36%; max-width: 200px; margin: 0 -8px var(--s1) var(--s2); }
+  .rules { grid-template-columns: 1fr 1fr; }
+  .kinds { grid-template-columns: 1fr 1fr; }
+  .coupon { padding: var(--s4) var(--s4) var(--s3); }
+}
+
+/* ---------- 横に舞台を置ける画面 ---------- */
+
+@media (min-width: 1000px) {
+  .sheet { width: min(1200px, calc(100% - 48px)); margin: var(--s4) auto var(--s6); padding: var(--s6) var(--s6) var(--s8); }
+  .sheet::before { inset: var(--s3); }
+  .crop { display: block; position: absolute; width: 24px; height: 24px; pointer-events: none; }
+  .crop::before, .crop::after { content: ""; position: absolute; background: var(--blue); }
+  .crop::before { width: 24px; height: 1.5px; }
+  .crop::after { width: 1.5px; height: 24px; }
+  .crop-tl { left: -16px; top: -16px; }
+  .crop-tl::before { left: 0; top: 23px; } .crop-tl::after { left: 23px; top: 0; }
+  .crop-tr { right: -16px; top: -16px; }
+  .crop-tr::before { right: 0; top: 23px; } .crop-tr::after { right: 23px; top: 0; }
+  .crop-bl { left: -16px; bottom: -16px; }
+  .crop-bl::before { left: 0; bottom: 23px; } .crop-bl::after { left: 23px; bottom: 0; }
+  .crop-br { right: -16px; bottom: -16px; }
+  .crop-br::before { right: 0; bottom: 23px; } .crop-br::after { right: 23px; bottom: 0; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
+    column-gap: var(--s4);
+  }
+  /* 舞台は紙の枠をはみ出す */
+  .stage {
+    display: block;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    margin-top: calc(var(--s6) * -1);
+    /* 紙の外へは出すが、画面の外へは出さない(横スクロールを作らない) */
+    margin-right: max(-80px, calc(-48px - max(0px, (100vw - 1216px) / 2)));
+  }
+  /* 左に余白を足して中身を右へ寄せ、羊の体が右の二重線を越えるようにする */
+  .stage-inner {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--s1);
+    padding: var(--s4) 0 var(--s4) 40px;
+  }
+  .stage-art {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: calc(100vh - 220px);
+    overflow: visible;
+    transform-origin: 50% 100%;
+  }
+  .stage-tag {
+    position: relative;
+    margin: 0;
+    padding: 0 var(--s2) 0 28px;
+    border: 2.5px solid var(--pink);
+    border-radius: 2px 16px 16px 2px;
+    background: var(--paper);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 34px;
+    transform: rotate(-3deg);
+  }
+  .stage-tag { display: inline-flex; align-items: center; gap: var(--s1); }
+  /* 札の数字と、読んでいる項目の丸数字をそろえて、どの項目の姿かを示す */
+  .stage-num {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: var(--paper);
+    font-family: var(--hand);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1;
+  }
+  .stage-num[hidden] { display: none; }
+  .item.is-active .num { background: var(--blue); color: var(--paper); }
+  .stage-tag::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    margin-top: -4.5px;
+    border-radius: 50%;
+    border: 2px solid var(--pink);
+  }
+
+  .sheet { overflow-x: visible; }
+  .hero { min-height: calc(100vh - 400px); padding: var(--s8) 0 var(--s4); }
+  .hero-visual { display: block; position: static; margin: 0; }
+  .hero-pose { display: none; }
+  .stamp { left: auto; top: var(--s4); right: -96px; width: 140px; height: 140px; }
+  .stamp-big { font-size: 28px; }
+  .pose-inline { display: none; }
+  .item { padding-top: var(--s8); }
+  .item:first-child { padding-top: var(--s4); }
+  .week { max-width: 520px; }
+  .day { grid-template-columns: 48px 72px minmax(0, 1fr); }
+  .hashtags { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hashtags div { display: block; }
+  .hashtags dt { min-width: 0; }
+}
+
+/* 1000〜1199px: 名前の欄が狭いので、ゴム印を羊の側へ寄せて名前に重ねない */
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .stamp { top: 0; right: -152px; width: 128px; height: 128px; }
+  .stamp-big { font-size: 25px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .is-swapping .stage-art,
+  .pose-inline.is-in svg,
+  .is-swapping,
+  .pose-inline.is-in { animation: none; }
+  .btn, .btn-primary::before { transition: none; }
+  .receipt-mark.is-pressed * { animation: none !important; }
+}
